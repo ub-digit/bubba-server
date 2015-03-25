@@ -1,0 +1,2 @@
+module BookingObjectsHelper
+end
