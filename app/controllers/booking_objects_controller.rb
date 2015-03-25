@@ -9,7 +9,7 @@ class BookingObjectsController < ApplicationController
         .joins(:bookings)
         .where(bookings: {pass_day: requested_date})
         .distinct
-      render json: {booking_objects: objs}
+      render json: {booking_objects: objs.as_json(pass_day: requested_date)}
     else
       render json: {}, status: 400
     end

@@ -9,4 +9,15 @@ class Booking < ActiveRecord::Base
   def self.time_to_numeric(timestamp)
     timestamp.strftime("%H.%M").to_f
   end
+
+  def timestring(time_float)
+    Time.parse(sprintf("%2.2f", time_float).gsub(/\./,':')).strftime("%H:%M")
+  end
+
+  def as_json(options = {})
+    super(except: [:booked_by]).merge({
+      pass_start: timestring(pass_start),
+      pass_stop: timestring(pass_stop)
+    })
+  end
 end
