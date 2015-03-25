@@ -5,3 +5,43 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
+
+def create_view(name, query)
+  ActiveRecord::Base.connection.execute("CREATE VIEW #{name} AS #{query};")
+end
+
+create_view("booking_objects", 
+  "SELECT bo.obj_id AS id,
+    bo.typ AS object_type,
+    bo.lokal_id AS location_id,
+    bo.namn AS name,
+    bo.plats AS place,
+    bo.ska_kvitteras AS require_confirmation,
+    bo.kommentar AS comment,
+    bo.aktiv AS active,
+    bo.intern_bruk AS internal,
+    t.antal_platser AS seats,
+    t.finns_dator AS has_computer,
+    t.finns_tavla AS has_whiteboard
+   FROM (boknings_objekt bo
+     JOIN typ_1_grupprum t ON ((t.obj_id = bo.obj_id)))")
+
+create_view("bookings",
+  "SELECT bokning.oid AS id,
+    bokning.obj_id AS booking_object_id,
+    bokning.dag AS pass_day,
+    bokning.start AS pass_start,
+    bokning.slut AS pass_stop,
+    bokning.bokad AS booked,
+    bokning.bokad_barcode AS booked_by,
+    bokning.status,
+    bokning.kommentar AS display_name
+   FROM bokning")
+
+create_view("locations",
+  "SELECT l.id,
+    l.name AS english_name,
+    l.namn AS swedish_name,
+    ls.sort_order
+   FROM (lokal l
+     JOIN lokal_sort ls ON ((l.id = ls.id)))")
