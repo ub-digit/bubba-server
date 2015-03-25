@@ -6,8 +6,33 @@
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
+def execute(query)
+  ActiveRecord::Base.connection.execute(query)
+end
+
+def db_insert(table, fields, values)
+  field_list = fields.join(", ")
+  values = values.map do |value| 
+    next value if value.kind_of?(Numeric)
+    quoted_value = value.gsub(/\'/, "''")
+    "'#{quoted_value}'"
+  end.join(", ")
+  execute("INSERT INTO #{table} (#{field_list}) VALUES(#{values})")
+end
+
 def create_view(name, query)
-  ActiveRecord::Base.connection.execute("CREATE VIEW #{name} AS #{query};")
+  execute("CREATE VIEW #{name} AS #{query};")
+end
+
+def create_locations
+  db_insert('lokal', ['id', 'name', 'namn'], [44, 'Test Library 1', 'Testbibliotek 1'])
+  db_insert('lokal', ['id', 'name', 'namn'], [60, 'Test Center 2', 'Testtorg 2'])
+  db_insert('lokal', ['id', 'name', 'namn'], [47, 'Test Library 3', 'Testbibliotek 3'])
+  db_insert('lokal', ['id', 'name', 'namn'], [66, 'Test Center 4', 'Testtorg 4'])
+  db_insert('lokal_sort', ['id', 'sort_order'], [44, 0])
+  db_insert('lokal_sort', ['id', 'sort_order'], [47, 0])
+  db_insert('lokal_sort', ['id', 'sort_order'], [60, 1])
+  db_insert('lokal_sort', ['id'], [66])
 end
 
 create_view("booking_objects", 
@@ -45,3 +70,5 @@ create_view("locations",
     ls.sort_order
    FROM (lokal l
      JOIN lokal_sort ls ON ((l.id = ls.id)))")
+
+create_locations
