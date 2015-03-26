@@ -15,9 +15,10 @@ class Booking < ActiveRecord::Base
   end
 
   def as_json(options = {})
-    super(except: [:booked_by]).merge({
+    super(except: [:booked_by, :display_name]).merge({
       pass_start: timestring(pass_start),
-      pass_stop: timestring(pass_stop)
+      pass_stop: timestring(pass_stop), 
+      signature: display_name
     })
   end
 end

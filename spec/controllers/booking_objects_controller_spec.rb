@@ -50,5 +50,10 @@ RSpec.describe BookingObjectsController, type: :controller do
       get :show, id: 999999, day: 5
       expect(response.status).to eq(404)
     end
+
+    it "should return a signature" do
+      get :show, id: 3, day: 5
+      expect(json['booking_object']['bookings'][0]).to have_key('signature')
+    end
   end
 end
