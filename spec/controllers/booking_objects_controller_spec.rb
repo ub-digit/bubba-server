@@ -31,4 +31,24 @@ RSpec.describe BookingObjectsController, type: :controller do
       expect(json['booking_objects'][0]['bookings'][0]['pass_stop']).to eq('12:00')
     end
   end
+
+  describe "get a room" do
+    it "should return a room with details of pass and equipment" do
+      get :show, id: 3, day: 5
+      expect(json['booking_object']).to have_key('bookings')
+      expect(json['booking_object']['bookings'].size).to eq(3)
+      expect(json['booking_object']['bookings'][0]['pass_start']).to eq('10:00')
+      expect(json['booking_object']['bookings'][0]['pass_stop']).to eq('12:00')
+    end
+
+    it "should give error when not supplying day" do
+      get :show, id: 3
+      expect(response.status).to eq(404)
+    end
+
+    it "should give error when supplying non-existent booking object" do
+      get :show, id: 999999, day: 5
+      expect(response.status).to eq(404)
+    end
+  end
 end
