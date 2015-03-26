@@ -30,6 +30,11 @@ RSpec.describe BookingObjectsController, type: :controller do
       expect(json['booking_objects'][0]['bookings'][0]['pass_start']).to eq('10:00')
       expect(json['booking_objects'][0]['bookings'][0]['pass_stop']).to eq('12:00')
     end
+
+    it "should give error when day isnt valid" do
+      get :index, location_id: 3, day: 8
+      expect(response.status).to eq(400)
+    end
   end
 
   describe "get a room" do
@@ -54,6 +59,11 @@ RSpec.describe BookingObjectsController, type: :controller do
     it "should return a signature" do
       get :show, id: 3, day: 5
       expect(json['booking_object']['bookings'][0]).to have_key('signature')
+    end
+
+    it "should give error when day isnt valid" do
+      get :show, id: 3, day: 8
+      expect(response.status).to eq(400)
     end
   end
 end
