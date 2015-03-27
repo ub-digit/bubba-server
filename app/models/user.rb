@@ -1,4 +1,4 @@
-class Auth
+class User
   require 'open-uri'
 
   def self.authenticate(username, password)

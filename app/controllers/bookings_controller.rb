@@ -3,7 +3,7 @@ class BookingsController < ApplicationController
     username = params[:username]
     password = params[:password]
     signature = params[:signature]
-    auth_status = Auth.authenticate(username, password)
+    auth_status = User.authenticate(username, password)
     if !auth_status
       render json: {error: {code: 'AUTH_ERROR'}}, status: 401
     elsif signature.blank?
