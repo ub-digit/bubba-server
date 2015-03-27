@@ -46,6 +46,16 @@ RSpec.describe BookingsController, type: :controller do
       expect(json['error']['code']).to eq('NOT_FOUND_ERROR')
     end
 
+    it "should return PASS_UNAVAIL_ERROR if pass was booked" do
+      put :update, id: @pass.id, username: '1234567890', password: '1111122222', signature: 'Test student'
+      expect(response.status).to eq(200)
+      expect(json).to have_key('booking')
+      expect(json['booking']['booked']).to eq(true)
+      put :update, id: @pass.id, username: '1234567891', password: '2222211111', signature: 'Test employee'
+      expect(response.status).to eq(400)
+      expect(json['error']['code']).to eq('PASS_UNAVAIL_ERROR')
+    end
+
     it "should accept a booking for an available pass by non-employee" do
       put :update, id: @pass.id, username: '1234567890', password: '1111122222', signature: 'Test student'
       expect(response.status).to eq(200)
