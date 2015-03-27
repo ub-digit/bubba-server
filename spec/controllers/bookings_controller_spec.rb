@@ -40,6 +40,12 @@ RSpec.describe BookingsController, type: :controller do
       expect(json['error']['code']).to eq('SIGN_ERROR')
     end
 
+    it "should return NOT_FOUND_ERROR if pass is missing" do
+      put :update, id: 99999999, username: '1234567890', password: '1111122222', signature: 'Test student'
+      expect(response.status).to eq(404)
+      expect(json['error']['code']).to eq('NOT_FOUND_ERROR')
+    end
+
     it "should accept a booking for an available pass by non-employee" do
       put :update, id: @pass.id, username: '1234567890', password: '1111122222', signature: 'Test student'
       expect(response.status).to eq(200)

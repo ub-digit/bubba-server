@@ -10,8 +10,12 @@ class BookingsController < ApplicationController
       render json: {error: {code: 'SIGN_ERROR'}}, status: 400
     else
       booking = Booking.find_by_id(params[:id])
-      booking.book(username, signature, {employee: auth_status[:employee]})
-      render json: {booking: booking}
+      if !booking
+        render json: {error: {code: 'NOT_FOUND_ERROR'}}, status: 404
+      else
+        booking.book(username, signature, {employee: auth_status[:employee]})
+        render json: {booking: booking}
+      end
     end
   end
 end
