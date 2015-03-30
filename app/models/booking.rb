@@ -38,6 +38,16 @@ class Booking < ActiveRecord::Base
         new_status = 4
       end
     end
+    # kolla så att användaren (user.rb) inte bokat fler än två pass redan
+
+    # tabell: bookings
+    # booked = true
+    # booked_by = bibkortsnummer
+    # status > 1
+
+    # bookings_count = Booking.where(booked: true, booked_by: username, pass_day: pass_day).count
+    # return false if bookings_count > 1 
+
     update_result = Booking.connection.execute(update_query(username, signature, new_status))
     if update_result.cmd_tuples == 1
       self.reload

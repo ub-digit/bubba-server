@@ -13,7 +13,10 @@ class BookingsController < ApplicationController
       if !booking
         render json: {error: {code: 'NOT_FOUND_ERROR'}}, status: 404
       else
-        if booking.book(username, signature, {employee: auth_status[:employee]})
+        bookings_count = Booking.where(booked: true, booked_by: username, pass_day: booking.pass_day).count
+        if bookings_count > 1 
+          render json: {error: {code: 'PASS_LIMIT_ERROR'}}, status: 400
+        elsif booking.book(username, signature, {employee: auth_status[:employee]})
           render json: {booking: booking}
         else
           render json: {error: {code: 'PASS_UNAVAIL_ERROR'}}, status: 400

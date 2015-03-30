@@ -5,6 +5,9 @@ RSpec.describe BookingsController, type: :controller do
     WebMock.disable_net_connect!
     @obj = BookingObject.find_by_id(1)
     @pass = @obj.bookings.first
+    @pass1 = @obj.bookings[0]
+    @pass2 = @obj.bookings[1]
+    @pass3 = @obj.bookings[2]
   end
   after :each do
     WebMock.allow_net_connect!
@@ -64,6 +67,16 @@ RSpec.describe BookingsController, type: :controller do
       expect(json['booking']['signature']).to eq("Test student")
       expect(json['booking']['status']).to_not eq(1)
       expect(json['booking']['status']).to_not eq(5)
+    end
+
+    it "should not accept the third booking for the same user on the same day" do
+      put :update, id: @pass1, username: '1234567890', password: '1111122222', signature: 'Test student'
+      expect(response.status).to eq(200)
+      put :update, id: @pass2, username: '1234567890', password: '1111122222', signature: 'Test student'
+      expect(response.status).to eq(200)
+      put :update, id: @pass3, username: '1234567890', password: '1111122222', signature: 'Test student'
+      expect(response.status).to eq(400)
+      expect(json['error']['code']).to eq('PASS_LIMIT_ERROR')
     end
   end
 end
