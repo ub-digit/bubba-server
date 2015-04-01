@@ -32,35 +32,35 @@ RSpec.describe BookingsController, type: :controller do
     end
 
     it "should return AUTH_ERROR if credentials fail" do
-      put :update, id: @pass.id, username: '1234567890', password: '0987654321', signature: 'Test'
+      put :update, id: @pass.id, username: '1234567890', password: '0987654321', signature: 'Test', cmd: 'book'
       expect(response.status).to eq(401)
       expect(json['error']['code']).to eq('AUTH_ERROR')
     end
 
     it "should return SIGN_ERROR if signature is missing" do
-      put :update, id: @pass.id, username: '1234567890', password: '1111122222'
+      put :update, id: @pass.id, username: '1234567890', password: '1111122222', cmd: 'book'
       expect(response.status).to eq(400)
       expect(json['error']['code']).to eq('SIGN_ERROR')
     end
 
     it "should return NOT_FOUND_ERROR if pass is missing" do
-      put :update, id: 99999999, username: '1234567890', password: '1111122222', signature: 'Test student'
+      put :update, id: 99999999, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
       expect(response.status).to eq(404)
       expect(json['error']['code']).to eq('NOT_FOUND_ERROR')
     end
 
     it "should return PASS_UNAVAIL_ERROR if pass was booked" do
-      put :update, id: @pass.id, username: '1234567890', password: '1111122222', signature: 'Test student'
+      put :update, id: @pass.id, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
       expect(response.status).to eq(200)
       expect(json).to have_key('booking')
       expect(json['booking']['booked']).to eq(true)
-      put :update, id: @pass.id, username: '1234567891', password: '2222211111', signature: 'Test employee'
+      put :update, id: @pass.id, username: '1234567891', password: '2222211111', signature: 'Test employee', cmd: 'book'
       expect(response.status).to eq(400)
       expect(json['error']['code']).to eq('PASS_UNAVAIL_ERROR')
     end
 
     it "should accept a booking for an available pass by non-employee" do
-      put :update, id: @pass.id, username: '1234567890', password: '1111122222', signature: 'Test student'
+      put :update, id: @pass.id, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
       expect(response.status).to eq(200)
       expect(json).to have_key('booking')
       expect(json['booking']['booked']).to eq(true)
@@ -70,11 +70,11 @@ RSpec.describe BookingsController, type: :controller do
     end
 
     it "should not accept the third booking for the same user on the same day" do
-      put :update, id: @pass1, username: '1234567890', password: '1111122222', signature: 'Test student'
+      put :update, id: @pass1, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
       expect(response.status).to eq(200)
-      put :update, id: @pass2, username: '1234567890', password: '1111122222', signature: 'Test student'
+      put :update, id: @pass2, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
       expect(response.status).to eq(200)
-      put :update, id: @pass3, username: '1234567890', password: '1111122222', signature: 'Test student'
+      put :update, id: @pass3, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
       expect(response.status).to eq(400)
       expect(json['error']['code']).to eq('PASS_LIMIT_ERROR')
     end
