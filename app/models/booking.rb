@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class Booking < ActiveRecord::Base
   belongs_to :booking_object
   self.primary_key = 'id'
@@ -16,6 +17,10 @@ class Booking < ActiveRecord::Base
 
   def timestamp_start
     timestamp(pass_start)
+  end
+
+  def timestamp_stop
+    timestamp(pass_stop)
   end
 
   def update_query(username, signature, new_status)
@@ -62,10 +67,12 @@ class Booking < ActiveRecord::Base
   end
 
   def as_json(options = {})
-    super(except: [:booked_by, :display_name]).merge({
+    data = super(except: [:booked_by, :display_name]).merge({
       pass_start: timestring(pass_start),
       pass_stop: timestring(pass_stop), 
       signature: display_name
     })
+    data[:booking_object] = booking_object if options[:include_booking_object]
+    data
   end
 end

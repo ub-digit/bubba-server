@@ -9,28 +9,70 @@ RSpec.describe BookingsController, type: :controller do
     @pass2 = @obj.bookings[1]
     @pass3 = @obj.bookings[2]
   end
-  after :each do
-    WebMock.allow_net_connect!
-  end
 
   # Mocked credentials:
   # valid student:    1234567890/1111122222
   # valid employee:   1234567891/2222211111
   # invalid:          1234567890/0987654321
 
-  describe "booking request" do
-    before :each do
-      stub_request(:get, "https://auth.example.com/")
-        .with(query: {bar: '1234567890', pnr: '0987654321'})
-        .to_return(:status => 200, :body => "-1", :headers => {})
-      stub_request(:get, "https://auth.example.com/")
-        .with(query: {bar: '1234567890', pnr: '1111122222'})
-        .to_return(:status => 200, :body => "100", :headers => {})
-      stub_request(:get, "https://auth.example.com/")
-        .with(query: {bar: '1234567891', pnr: '2222211111'})
-        .to_return(:status => 200, :body => "110", :headers => {})
+  before :each do
+    stub_request(:get, "https://auth.example.com/")
+      .with(query: {bar: '1234567890', pnr: '0987654321'})
+      .to_return(:status => 200, :body => "-1", :headers => {})
+    stub_request(:get, "https://auth.example.com/")
+      .with(query: {bar: '1234567890', pnr: '1111122222'})
+      .to_return(:status => 200, :body => "100", :headers => {})
+    stub_request(:get, "https://auth.example.com/")
+      .with(query: {bar: '1234567891', pnr: '2222211111'})
+      .to_return(:status => 200, :body => "110", :headers => {})
+  end
+
+  after :each do
+    WebMock.allow_net_connect!
+  end
+
+  describe "show list of bookings" do
+    context "wrong credentials" do
+      it "should return AUTH_ERROR when credentials are wrong" do
+        get :index, username: '1234567890', password: '0987654321'
+        expect(response.status).to eq(401)
+        expect(json['error']['code']).to eq("AUTH_ERROR")
+      end
     end
 
+    context "correct credentials" do
+      before :each do
+        put :update, id: @pass1, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
+        put :update, id: @pass2, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
+      end
+
+      after :each do
+        Time.spec_reset_forced_time
+      end
+
+      it "should return list of future passes booked by user" do
+        get :index, username: '1234567890', password: '1111122222'
+        expect(json['bookings']).to_not be_empty
+      end
+
+      it "should not list passes that have expired" do
+        Time.spec_force_time(@pass1.timestamp_start)
+        get :index, username: '1234567890', password: '1111122222'
+        expect(json['bookings'].count).to be(2)
+        Time.spec_force_time(@pass1.timestamp_stop+1.minute)
+        get :index, username: '1234567890', password: '1111122222'
+        expect(json['bookings'].count).to be(1)
+      end
+
+      it "should include booking object data in pass lite item" do
+        Time.spec_force_time(@pass1.timestamp_start)
+        get :index, username: '1234567890', password: '1111122222'
+        expect(json['bookings'][0]['booking_object']['name']).to_not be_nil
+      end
+    end
+  end
+
+  describe "booking request" do
     it "should return AUTH_ERROR if credentials fail" do
       put :update, id: @pass.id, username: '1234567890', password: '0987654321', signature: 'Test', cmd: 'book'
       expect(response.status).to eq(401)

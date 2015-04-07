@@ -1,4 +1,21 @@
 class BookingsController < ApplicationController
+  def index
+    username = params[:username]
+    password = params[:password]
+    auth_status = User.authenticate(username, password)
+
+    if !auth_status
+      render json: {error: {code: 'AUTH_ERROR'}}, status: 401
+      return
+    end
+
+    bookings = Booking.where(booked_by: username)
+    bookings = bookings.select do |booking| 
+      booking.timestamp_stop > Time.now
+    end
+    render json: {bookings: bookings.as_json(include_booking_object: true)}
+  end
+
   def update
     username = params[:username]
     password = params[:password]
