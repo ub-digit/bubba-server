@@ -51,6 +51,7 @@ RSpec.describe BookingsController, type: :controller do
       end
 
       it "should return list of future passes booked by user" do
+        Time.spec_force_time(@pass1.timestamp_start)
         get :index, username: '1234567890', password: '1111122222'
         expect(json['bookings']).to_not be_empty
       end
