@@ -23,11 +23,16 @@ class Booking < ActiveRecord::Base
     timestamp(pass_stop)
   end
 
-  def update_query(username, signature, new_status)
+  def book_query(username, signature, new_status)
     "UPDATE bokning "+
       "SET bokad_barcode = #{Booking.sanitize(username)}, bokad = true, "+
       "    status = #{new_status}, kommentar = #{Booking.sanitize(signature)} "+
       "WHERE oid = #{self.id} AND bokad = false AND status = 1"
+  end
+
+  def confirm_query(username)
+    "UPDATE bokning SET status = 4"+
+      "WHERE oid = #{self.id} AND bokad = true AND status = 3 AND bokad_barcode = #{Booking.sanitize(username)}"
   end
 
   def book(username, signature, metadata)
@@ -53,7 +58,17 @@ class Booking < ActiveRecord::Base
     # bookings_count = Booking.where(booked: true, booked_by: username, pass_day: pass_day).count
     # return false if bookings_count > 1 
 
-    update_result = Booking.connection.execute(update_query(username, signature, new_status))
+    update_result = Booking.connection.execute(book_query(username, signature, new_status))
+    if update_result.cmd_tuples == 1
+      self.reload
+      return true
+    else
+      return false
+    end
+  end
+
+  def confirm(username)
+    update_result = Booking.connection.execute(confirm_query(username))
     if update_result.cmd_tuples == 1
       self.reload
       return true

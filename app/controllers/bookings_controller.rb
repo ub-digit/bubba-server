@@ -43,21 +43,35 @@ class BookingsController < ApplicationController
       
     if cmd == 'book' 
       bookings_count = Booking.where(booked: true, booked_by: username, pass_day: booking.pass_day).count
-    end
 
-    if cmd == 'book' && bookings_count > 1 
-      render json: {error: {code: 'PASS_LIMIT_ERROR'}}, status: 400
-      return
-    end
+      if bookings_count > 1 
+        render json: {error: {code: 'PASS_LIMIT_ERROR'}}, status: 400
+        return
+      end
   
-    if !booking.book(username, signature, {employee: auth_status[:employee]})
-      render json: {error: {code: 'PASS_UNAVAIL_ERROR'}}, status: 400
-      return
+      if !booking.book(username, signature, {employee: auth_status[:employee]})
+        render json: {error: {code: 'PASS_UNAVAIL_ERROR'}}, status: 400
+        return
+      end
     end
+    
+    if cmd == 'confirm'
+      if booking.booked_by != username
+        render json: {error: {code: 'AUTH_ERROR'}}, status: 401
+        return
+      end
 
-    #if !booking.confirm
+      if booking.status != 3
+        render json: {error: {code: 'PASS_UNCONFIRMABLE_ERROR'}}, status: 400
+        return
+      end      
+
+      if !booking.confirm(username)
+        render json: {error: {code: 'PASS_UNCONFIRMABLE_ERROR'}}, status: 400
+        return
+      end
+    end
 
     render json: {booking: booking}
-
   end
 end
