@@ -5,9 +5,9 @@ class UsersController < ApplicationController
     auth_status = User.authenticate(username, password)
 
     if auth_status
-      render json: {auth: true}
+      render json: {auth: {status: 'success'}}
     else
-      render json: {auth: false}, status: 401
+      render json: {auth: {status: 'fail'}}, status: 401
     end
   end
 end

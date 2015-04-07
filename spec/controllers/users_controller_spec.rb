@@ -26,13 +26,13 @@ RSpec.describe UsersController, type: :controller do
   describe "authenticate user" do
     it "should return true for valid user" do
       get :auth, username: '1234567890', password: '1111122222'
-      expect(json['auth']).to be_truthy
+      expect(json['auth']['status']).to eq('success')
     end
 
     it "should return false for invalid user" do
       get :auth, username: '1234567890', password: '0987654321'
       expect(response.status).to eq(401)
-      expect(json['auth']).to be_falsey
+      expect(json['auth']['status']).to eq('fail')
     end
   end
 end
