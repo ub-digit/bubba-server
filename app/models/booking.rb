@@ -35,6 +35,12 @@ class Booking < ActiveRecord::Base
       "WHERE oid = #{self.id} AND bokad = true AND status = 3 AND bokad_barcode = #{Booking.sanitize(username)}"
   end
 
+  def cancel_query(username)
+    "UPDATE bokning "+
+      "SET status = 1, bokad = false, kommentar = NULL, bokad_barcode = NULL "+
+      "WHERE oid = #{self.id} AND bokad = true AND status IN (2,3) AND bokad_barcode = #{Booking.sanitize(username)}"
+  end
+
   def book(username, signature, metadata)
     new_status = 2
     if !metadata[:current_time]
@@ -48,15 +54,6 @@ class Booking < ActiveRecord::Base
         new_status = 4
       end
     end
-    # kolla så att användaren (user.rb) inte bokat fler än två pass redan
-
-    # tabell: bookings
-    # booked = true
-    # booked_by = bibkortsnummer
-    # status > 1
-
-    # bookings_count = Booking.where(booked: true, booked_by: username, pass_day: pass_day).count
-    # return false if bookings_count > 1 
 
     update_result = Booking.connection.execute(book_query(username, signature, new_status))
     if update_result.cmd_tuples == 1
@@ -69,6 +66,16 @@ class Booking < ActiveRecord::Base
 
   def confirm(username)
     update_result = Booking.connection.execute(confirm_query(username))
+    if update_result.cmd_tuples == 1
+      self.reload
+      return true
+    else
+      return false
+    end
+  end
+
+  def cancel(username)
+    update_result = Booking.connection.execute(cancel_query(username))
     if update_result.cmd_tuples == 1
       self.reload
       return true

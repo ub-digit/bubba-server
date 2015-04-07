@@ -168,4 +168,63 @@ RSpec.describe BookingsController, type: :controller do
       end
     end
   end
+
+  describe "cancel request" do
+    before :each do
+      put :update, id: @pass1, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
+      put :update, id: @pass2, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
+      ActiveRecord::Base.connection.execute("UPDATE bokning SET status = 3 WHERE oid = #{@pass1.id}")
+    end
+    
+    after :each do
+      Time.spec_reset_forced_time
+    end
+
+    context "bad data" do
+      it "should return AUTH_ERROR with bad credentials" do
+        put :update, id: @pass1, username: '1234567890', password: '0987654321', cmd: 'cancel'
+        expect(response.status).to eq(401)
+        expect(json['error']['code']).to eq('AUTH_ERROR')
+      end
+
+      it "should return AUTH_ERROR if pass booked by someone else" do
+        put :update, id: @pass1, username: '1234567891', password: '2222211111', cmd: 'cancel'
+        expect(response.status).to eq(401)
+        expect(json['error']['code']).to eq('AUTH_ERROR')
+      end
+
+      it "should return NOT_FOUND_ERROR if pass not found" do
+        put :update, id: 9999999999999999999, username: '1234567891', password: '2222211111', cmd: 'cancel'
+        expect(response.status).to eq(404)
+        expect(json['error']['code']).to eq('NOT_FOUND_ERROR')
+      end
+
+      it "should return PASS_UNCANCELABLE_ERROR if pass not in cancelable status" do
+        put :update, id: @pass1, username: '1234567890', password: '1111122222', cmd: 'confirm'
+        put :update, id: @pass1, username: '1234567890', password: '1111122222', cmd: 'cancel'
+        expect(response.status).to eq(400)
+        expect(json['error']['code']).to eq('PASS_UNCANCELABLE_ERROR')
+      end
+    end
+
+    context "proper data" do
+      it "should cancel pass and return updated pass for booked, unconfirmed/unconfirmable pass" do
+        put :update, id: @pass2, username: '1234567890', password: '1111122222', cmd: 'cancel'
+        expect(response.status).to eq(200)
+        expect(json['booking']['status']).to eq(1)
+        expect(json['booking']['booked']).to eq(false)
+        expect(json['booking']['booked']).to eq(false)
+        expect(json['booking']['signature']).to be_blank
+      end
+
+      it "should cancel pass and return updated pass for booked, unconfirmed/confirmable pass" do
+        put :update, id: @pass1, username: '1234567890', password: '1111122222', cmd: 'cancel'
+        expect(response.status).to eq(200)
+        expect(json['booking']['status']).to eq(1)
+        expect(json['booking']['booked']).to eq(false)
+        expect(json['booking']['booked']).to eq(false)
+        expect(json['booking']['signature']).to be_blank
+      end
+    end
+  end
 end

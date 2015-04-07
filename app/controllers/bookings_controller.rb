@@ -55,12 +55,14 @@ class BookingsController < ApplicationController
       end
     end
     
-    if cmd == 'confirm'
+    if cmd == 'confirm' || cmd == 'cancel'
       if booking.booked_by != username
         render json: {error: {code: 'AUTH_ERROR'}}, status: 401
         return
       end
+    end
 
+    if cmd == 'confirm'
       if booking.status != 3
         render json: {error: {code: 'PASS_UNCONFIRMABLE_ERROR'}}, status: 400
         return
@@ -68,6 +70,18 @@ class BookingsController < ApplicationController
 
       if !booking.confirm(username)
         render json: {error: {code: 'PASS_UNCONFIRMABLE_ERROR'}}, status: 400
+        return
+      end
+    end
+
+    if cmd == 'cancel'
+      if [1,4,5].include?(booking.status)
+        render json: {error: {code: 'PASS_UNCANCELABLE_ERROR'}}, status: 400
+        return
+      end      
+
+      if !booking.cancel(username)
+        render json: {error: {code: 'PASS_UNCANCELABLE_ERROR'}}, status: 400
         return
       end
     end
