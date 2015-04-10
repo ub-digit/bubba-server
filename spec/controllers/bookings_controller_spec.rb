@@ -42,6 +42,7 @@ RSpec.describe BookingsController, type: :controller do
 
     context "correct credentials" do
       before :each do
+        Time.spec_force_time(@pass1.timestamp_start - 8.hours)
         put :update, id: @pass1, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
         put :update, id: @pass2, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
       end
@@ -69,6 +70,22 @@ RSpec.describe BookingsController, type: :controller do
         Time.spec_force_time(@pass1.timestamp_start)
         get :index, username: '1234567890', password: '1111122222'
         expect(json['bookings'][0]['booking_object']['name']).to_not be_nil
+      end
+
+      it "should indicate confirmability on passes" do
+        Time.spec_force_time(@pass1.timestamp_start - 2.hours)
+        ActiveRecord::Base.connection.execute("UPDATE bokning SET status = 3 WHERE oid = #{@pass1.id}")
+        get :index, username: '1234567890', password: '1111122222'
+        expect(json['bookings'][0]['confirmable']).to be_truthy
+        expect(json['bookings'][1]['confirmable']).to be_falsey
+      end
+
+      it "should indicate cancelability on passes" do
+        Time.spec_force_time(@pass1.timestamp_start - 2.hours)
+        ActiveRecord::Base.connection.execute("UPDATE bokning SET status = 4 WHERE oid = #{@pass2.id}")
+        get :index, username: '1234567890', password: '1111122222'
+        expect(json['bookings'][0]['cancelable']).to be_truthy
+        expect(json['bookings'][1]['cancelable']).to be_falsey
       end
     end
   end
@@ -171,7 +188,9 @@ RSpec.describe BookingsController, type: :controller do
 
   describe "cancel request" do
     before :each do
+      Time.spec_force_time(@pass1.timestamp_start-1.hour)
       put :update, id: @pass1, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
+      Time.spec_force_time(@pass2.timestamp_start-1.hour)
       put :update, id: @pass2, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
       ActiveRecord::Base.connection.execute("UPDATE bokning SET status = 3 WHERE oid = #{@pass1.id}")
     end
@@ -209,6 +228,7 @@ RSpec.describe BookingsController, type: :controller do
 
     context "proper data" do
       it "should cancel pass and return updated pass for booked, unconfirmed/unconfirmable pass" do
+        Time.spec_force_time(@pass2.timestamp_start-1.hour)
         put :update, id: @pass2, username: '1234567890', password: '1111122222', cmd: 'cancel'
         expect(response.status).to eq(200)
         expect(json['booking']['status']).to eq(1)
@@ -218,6 +238,7 @@ RSpec.describe BookingsController, type: :controller do
       end
 
       it "should cancel pass and return updated pass for booked, unconfirmed/confirmable pass" do
+        Time.spec_force_time(@pass1.timestamp_start-1.hour)
         put :update, id: @pass1, username: '1234567890', password: '1111122222', cmd: 'cancel'
         expect(response.status).to eq(200)
         expect(json['booking']['status']).to eq(1)

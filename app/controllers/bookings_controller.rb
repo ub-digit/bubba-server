@@ -9,7 +9,7 @@ class BookingsController < ApplicationController
       return
     end
 
-    bookings = Booking.where(booked_by: username)
+    bookings = Booking.where(booked_by: username).order(:pass_day, :pass_start)
     bookings = bookings.select do |booking| 
       booking.timestamp_stop > Time.now
     end

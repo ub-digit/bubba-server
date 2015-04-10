@@ -88,6 +88,14 @@ class Booking < ActiveRecord::Base
     timestamp(time_float).strftime("%H:%M")
   end
 
+  def is_confirmable?
+    status == 3
+  end
+
+  def is_cancelable?
+    status == 2
+  end
+
   def as_json(options = {})
     data = super(except: [:booked_by, :display_name]).merge({
       pass_start: timestring(pass_start),
@@ -95,6 +103,8 @@ class Booking < ActiveRecord::Base
       signature: display_name
     })
     data[:booking_object] = booking_object if options[:include_booking_object]
+    data[:confirmable] = is_confirmable?
+    data[:cancelable] = is_cancelable?
     data
   end
 end
