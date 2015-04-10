@@ -11,8 +11,13 @@ class Booking < ActiveRecord::Base
     timestamp.strftime("%H.%M").to_f
   end
 
+  def daystring
+    pass_day.strftime("%Y-%m-%d")
+  end
+
   def timestamp(time_float)
-    Time.parse(sprintf("%2.2f", time_float).gsub(/\./,':'))
+    parse_string = sprintf("%s %2.2f", daystring, time_float).gsub(/\./,':')
+    Time.parse(parse_string)
   end
 
   def timestamp_start
