@@ -98,7 +98,7 @@ class Booking < ActiveRecord::Base
   end
 
   def is_cancelable?
-    status == 2
+    status == 2 || status == 3
   end
 
   def as_json(options = {})
