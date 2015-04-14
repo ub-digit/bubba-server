@@ -56,6 +56,16 @@ RSpec.describe BookingObjectsController, type: :controller do
       expect(response.status).to eq(404)
     end
 
+    it "should mark as unbookable for pass that has passed" do
+      Time.spec_reset_forced_time
+      get :show, id: 3, day: 0
+      pass = Booking.find_by_id(json['booking_object']['bookings'][0]['id'])
+      Time.spec_force_time(pass.timestamp_stop + 1.minute)
+      get :show, id: 3, day: 0
+      expect(json['booking_object']['bookings'][0]['bookable']).to be_falsey
+      expect(json['booking_object']['bookings'][1]['bookable']).to be_truthy
+    end
+
     it "should return a signature" do
       get :show, id: 3, day: 5
       expect(json['booking_object']['bookings'][0]).to have_key('signature')

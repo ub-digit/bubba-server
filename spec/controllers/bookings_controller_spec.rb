@@ -91,6 +91,10 @@ RSpec.describe BookingsController, type: :controller do
   end
 
   describe "booking request" do
+    before :each do
+      Time.spec_force_time(@pass.timestamp_start - 4.hours)
+    end
+
     it "should return AUTH_ERROR if credentials fail" do
       put :update, id: @pass.id, username: '1234567890', password: '0987654321', signature: 'Test', cmd: 'book'
       expect(response.status).to eq(401)
@@ -142,6 +146,7 @@ RSpec.describe BookingsController, type: :controller do
 
   describe "confirm request" do
     before :each do
+      Time.spec_force_time(@pass1.timestamp_start - 8.hours)
       put :update, id: @pass1, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
       put :update, id: @pass2, username: '1234567890', password: '1111122222', signature: 'Test student', cmd: 'book'
       ActiveRecord::Base.connection.execute("UPDATE bokning SET status = 3 WHERE oid = #{@pass1.id}")

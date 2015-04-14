@@ -46,6 +46,21 @@ class Booking < ActiveRecord::Base
       "WHERE oid = #{self.id} AND bokad = true AND status IN (2,3) AND bokad_barcode = #{Booking.sanitize(username)}"
   end
 
+  # Book a pass with a signature
+  #
+  # Rules:
+  # User is employee:
+  #   status => 5 (Booked, confirmed, employee)
+  # If today:
+  #   if pass not started and starting within 30 minutes:
+  #     status => 3 (Booked, unconfirmed, confirmable)
+  #   if pass started, not yet finished:
+  #     status => 4 (Booked, confirmed)
+  #   if pass finished:
+  #     UNAVAILABLE
+  # else
+  #   status => 2 (Booked, unconfirmed, unconfirmable)
+  #
   def book(username, signature, metadata)
     new_status = 2
     if !metadata[:current_time]
@@ -55,8 +70,14 @@ class Booking < ActiveRecord::Base
       new_status = 5 
     else
       if metadata[:current_time] >= timestamp_start-30.minutes &&
-          metadata[:current_time] <= timestamp_start+30.minutes
-        new_status = 4
+          metadata[:current_time] <= timestamp_start
+        new_status = 3
+      elsif metadata[:current_time] > timestamp_start
+        if metadata[:current_time] < timestamp_stop
+          new_status = 4
+        elsif metadata[:current_time] > timestamp_stop
+          return false
+        end
       end
     end
 
@@ -101,6 +122,10 @@ class Booking < ActiveRecord::Base
     status == 2 || status == 3
   end
 
+  def is_bookable?
+    status == 1 && timestamp_stop >= Time.now
+  end
+
   def as_json(options = {})
     data = super(except: [:booked_by, :display_name]).merge({
       pass_start: timestring(pass_start),
@@ -110,6 +135,7 @@ class Booking < ActiveRecord::Base
     data[:booking_object] = booking_object if options[:include_booking_object]
     data[:confirmable] = is_confirmable?
     data[:cancelable] = is_cancelable?
+    data[:bookable] = is_bookable?
     data
   end
 end
