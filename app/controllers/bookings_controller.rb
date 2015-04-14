@@ -63,7 +63,7 @@ class BookingsController < ApplicationController
     end
 
     if cmd == 'confirm'
-      if booking.status != 3
+      if !booking.is_confirmable?
         render json: {error: {code: 'PASS_UNCONFIRMABLE_ERROR'}}, status: 400
         return
       end      
@@ -75,7 +75,7 @@ class BookingsController < ApplicationController
     end
 
     if cmd == 'cancel'
-      if [1,4,5].include?(booking.status)
+      if !booking.is_cancelable?
         render json: {error: {code: 'PASS_UNCANCELABLE_ERROR'}}, status: 400
         return
       end      

@@ -66,7 +66,7 @@ RSpec.describe BookingsController, type: :controller do
         expect(json['bookings'].count).to be(1)
       end
 
-      it "should include booking object data in pass lite item" do
+      it "should include booking object data in pass" do
         Time.spec_force_time(@pass1.timestamp_start)
         get :index, username: '1234567890', password: '1111122222'
         expect(json['bookings'][0]['booking_object']['name']).to_not be_nil
@@ -233,7 +233,6 @@ RSpec.describe BookingsController, type: :controller do
         expect(response.status).to eq(200)
         expect(json['booking']['status']).to eq(1)
         expect(json['booking']['booked']).to eq(false)
-        expect(json['booking']['booked']).to eq(false)
         expect(json['booking']['signature']).to be_blank
       end
 
@@ -242,7 +241,6 @@ RSpec.describe BookingsController, type: :controller do
         put :update, id: @pass1, username: '1234567890', password: '1111122222', cmd: 'cancel'
         expect(response.status).to eq(200)
         expect(json['booking']['status']).to eq(1)
-        expect(json['booking']['booked']).to eq(false)
         expect(json['booking']['booked']).to eq(false)
         expect(json['booking']['signature']).to be_blank
       end
