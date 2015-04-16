@@ -33,9 +33,11 @@ def create_locations
   db_insert('lokal', ['id', 'name', 'namn'], [60, 'Test Center 2', 'Testtorg 2'])
   db_insert('lokal', ['id', 'name', 'namn'], [47, 'Test Library 3', 'Testbibliotek 3'])
   db_insert('lokal', ['id', 'name', 'namn'], [66, 'Test Center 4', 'Testtorg 4'])
+  db_insert('lokal', ['id', 'name', 'namn'], [67, 'Test No Objects', 'Test-noobj'])
   db_insert('lokal_sort', ['id', 'sort_order'], [44, 0])
   db_insert('lokal_sort', ['id', 'sort_order'], [47, 0])
   db_insert('lokal_sort', ['id', 'sort_order'], [60, 1])
+  db_insert('lokal_sort', ['id', 'sort_order'], [67, 1])
   db_insert('lokal_sort', ['id'], [66])
 end
 
