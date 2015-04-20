@@ -122,8 +122,12 @@ class Booking < ActiveRecord::Base
     status == 2 || status == 3
   end
 
+  def is_expired?
+    timestamp_stop < Time.now
+  end
+
   def is_bookable?
-    status == 1 && timestamp_stop >= Time.now
+    status == 1 && !is_expired?
   end
 
   def as_json(options = {})
@@ -136,6 +140,7 @@ class Booking < ActiveRecord::Base
     data[:confirmable] = is_confirmable?
     data[:cancelable] = is_cancelable?
     data[:bookable] = is_bookable?
+    data[:expired] = is_expired?
     data
   end
 end
