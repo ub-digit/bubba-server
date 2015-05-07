@@ -119,7 +119,7 @@ class Booking < ActiveRecord::Base
   end
 
   def is_cancelable?
-    status == 2 || status == 3
+    status == 2 || status == 3 || status == 5
   end
 
   def is_expired?
