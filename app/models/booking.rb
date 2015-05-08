@@ -43,7 +43,7 @@ class Booking < ActiveRecord::Base
   def cancel_query(username)
     "UPDATE bokning "+
       "SET status = 1, bokad = false, kommentar = NULL, bokad_barcode = NULL "+
-      "WHERE oid = #{self.id} AND bokad = true AND status IN (2,3) AND bokad_barcode = #{Booking.sanitize(username)}"
+      "WHERE oid = #{self.id} AND bokad = true AND status IN (2,3,5) AND bokad_barcode = #{Booking.sanitize(username)}"
   end
 
   # Book a pass with a signature
