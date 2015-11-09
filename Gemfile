@@ -47,7 +47,15 @@ end
 
 group :development, :test do
   gem 'rspec-rails', '~> 3.1'
-  gem 'database_cleaner'  
+  gem 'database_cleaner'
+end
+
+group :development do
+  gem 'capistrano',  '~> 3.4.0'
+  gem 'capistrano-rails', '~> 1.1'
+  gem 'capistrano-passenger' #For passenger specific projects
+  gem 'capistrano-bundler', '~> 1.1.2' #To be able to run bundle install on deploy
+  gem 'capistrano-rvm' # För att hantera ruby version vid deploy
 end
 
 group :test do
@@ -57,4 +65,4 @@ end
 gem 'activeresource'
 
 gem "codeclimate-test-reporter", group: :test, require: nil
-gem 'rack-cors' 
+gem 'rack-cors'
