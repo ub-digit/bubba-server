@@ -49,3 +49,9 @@ doc/app/
 
 #Ignore code climate coverage directory
 /coverage
+
+# Ignore Capistrano related files that live within
+# the config repository.
+Capfile
+config/deploy.rb
+config/deploy/*.rb
