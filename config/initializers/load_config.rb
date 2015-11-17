@@ -1,3 +1,4 @@
+require 'yaml'
 # Read config files and store applicable values in APP_CONFIG constant
 main_config = YAML.load_file("#{Rails.root}/config/config.yml")
 if Rails.env == 'test'
