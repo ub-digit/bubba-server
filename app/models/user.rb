@@ -8,8 +8,8 @@ class User
     auth_ok = false
     is_employee = false
     https = Net::HTTP.new(url.host, url.port)
-    https.use_ssl = true
-    https.ssl_version = :TLSv1
+    #https.use_ssl = true
+    #https.ssl_version = :TLSv1
     req = https.request(Net::HTTP::Get.new(url.request_uri))
     result = req.body
     if result == "-1"
