@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.0'
 
-gem 'puma', '~> 3'
+gem 'puma', '~> 4'
 
 # Use postgresql as the database for Active Record
 gem 'pg'
